@@ -14,7 +14,7 @@ class BasicAuthInterceptor: Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request()
 
-        if(request.url().encodedPath() in ignoreAuthPaths){
+        if(request.url.encodedPath in ignoreAuthPaths){
             return chain.proceed(request)
         }
         val authenticatedRequest = request.newBuilder()

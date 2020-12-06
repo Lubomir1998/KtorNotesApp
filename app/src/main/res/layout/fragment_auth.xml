@@ -174,8 +174,7 @@
             android:hint="E-Mail"
             android:textColorHint="@android:color/tertiary_text_light"
             android:inputType="textEmailAddress"
-            android:padding="16dp"
-            android:textColor="@android:color/white" />
+            android:padding="16dp"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -197,8 +196,7 @@
             android:hint="Password"
             android:textColorHint="@android:color/tertiary_text_light"
             android:inputType="textPassword"
-            android:padding="16dp"
-            android:textColor="@android:color/white" />
+            android:padding="16dp"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -220,8 +218,7 @@
             android:hint="Confirm Password"
             android:textColorHint="@android:color/tertiary_text_light"
             android:inputType="textPassword"
-            android:padding="16dp"
-            android:textColor="@android:color/white"/>
+            android:padding="16dp"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 

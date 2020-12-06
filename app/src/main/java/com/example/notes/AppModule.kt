@@ -3,7 +3,6 @@ package com.example.notes
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.room.Room
-import androidx.room.RoomDatabase
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.example.notes.data.local.NoteDatabase
@@ -26,12 +25,11 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideNoteDB(@ApplicationContext context: Context): RoomDatabase = Room.databaseBuilder(
+    fun provideNoteDB(@ApplicationContext context: Context) = Room.databaseBuilder(
         context,
         NoteDatabase::class.java,
         "notesDB"
-    ).fallbackToDestructiveMigrationOnDowngrade()
-        .build()
+    ).build()
 
 
     @Singleton
