@@ -3,11 +3,15 @@ package com.example.notes.repositories
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import com.example.notes.data.local.Note
 import com.example.notes.data.local.NoteDao
 import com.example.notes.data.remote.NoteApi
 import com.example.notes.data.remote.requests.AccountRequest
+import com.example.notes.networkBoundResource
 import com.example.notes.other.Resource
+import com.example.notes.other.checkForInternetConnection
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -15,7 +19,7 @@ class NotesRepository
 @Inject constructor(
         private val noteDao: NoteDao,
         private val noteApi: NoteApi,
-        context: Application
+        private val context: Application
 ){
 
     suspend fun registerUser(email: String, password: String) = withContext(Dispatchers.IO) {
@@ -43,5 +47,34 @@ class NotesRepository
             Resource.error("Couldn't connect to servers. Check your internet connection", null)
         }
     }
+
+
+
+    fun getAllNotes(): Flow<Resource<List<Note>>> {
+        return networkBoundResource(
+                query = {
+                    noteDao.getAllNotes()
+                },
+                fetch = {
+                    noteApi.getNotes()
+                },
+                savedFetchResult = { response ->
+                    response.body()?.let {
+                        // TODO save notes in database
+                    }
+                },
+                shouldFetch = {
+                    checkForInternetConnection(context)
+                }
+        )
+    }
+
+
+
+
+
+
+
+
 
 }
