@@ -3,13 +3,15 @@ package com.example.notes.ui
 import android.content.SharedPreferences
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.room.Index
+import com.example.notes.Constants.KEY_EMAIL
+import com.example.notes.Constants.KEY_PASSWORD
+import com.example.notes.Constants.NO_EMAIL
+import com.example.notes.Constants.NO_PASSWORD
 import com.example.notes.R
 import com.example.notes.data.remote.BasicAuthInterceptor
 import com.example.notes.databinding.FragmentAuthBinding
@@ -42,6 +44,10 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        if(isLoggedIn()) {
+            authenticateApi(currentEmail ?: "", currentPassword ?: "")
+            redirectLogin()
+        }
 
         requireActivity().requestedOrientation = SCREEN_ORIENTATION_PORTRAIT
 
@@ -73,6 +79,13 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
 
 
 
+
+    private fun isLoggedIn(): Boolean {
+        currentEmail = sharedPrefs.getString(KEY_EMAIL, NO_EMAIL) ?: NO_EMAIL
+        currentPassword = sharedPrefs.getString(KEY_PASSWORD, NO_PASSWORD) ?: NO_PASSWORD
+
+        return currentEmail != NO_EMAIL && currentPassword != NO_PASSWORD
+    }
 
 
     private fun redirectLogin() {
@@ -119,8 +132,8 @@ class AuthFragment: BaseFragment(R.layout.fragment_auth) {
                         showSnackBar(result.data ?: "Successfully logged in")
 
                         sharedPrefs.edit()
-                                .putString("key_email", currentEmail)
-                                .putString("key_pass", currentPassword)
+                                .putString(KEY_EMAIL, currentEmail)
+                                .putString(KEY_PASSWORD, currentPassword)
                                 .apply()
 
                         authenticateApi(currentEmail ?: "", currentPassword ?: "")
