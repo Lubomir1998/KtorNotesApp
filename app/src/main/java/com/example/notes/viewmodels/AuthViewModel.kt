@@ -1,5 +1,6 @@
 package com.example.notes.viewmodels
 
+import androidx.core.text.isDigitsOnly
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -28,6 +29,18 @@ class AuthViewModel
             _registerStatus.postValue(Resource.error("The passwords do not match", null))
             return
         }
+        if(password.length < 6 || password.length > 18) {
+            _registerStatus.postValue(Resource.error("Password must be between 6 and 18 characters", null))
+            return
+        }
+        if(password.isDigitsOnly()) {
+            _registerStatus.postValue(Resource.error("Password must contain at least one letter", null))
+            return
+        }
+        if(!(password.matches(".*\\d+.*".toRegex()))) {
+            _registerStatus.postValue(Resource.error("Password must contain at least one number", null))
+            return
+        }
         viewModelScope.launch {
             val result = repository.registerUser(email, password)
             _registerStatus.postValue(result)
@@ -41,7 +54,6 @@ class AuthViewModel
             _loginStatus.postValue(Resource.error("Please fill out all the fields", null))
             return
         }
-
         viewModelScope.launch {
             val result = repository.loginUser(email, password)
             _loginStatus.postValue(result)
