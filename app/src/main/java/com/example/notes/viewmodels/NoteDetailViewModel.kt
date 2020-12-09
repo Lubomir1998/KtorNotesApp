@@ -1,6 +1,12 @@
 package com.example.notes.viewmodels
 
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
+import com.example.notes.repositories.NotesRepository
 
-class NoteDetailViewModel: ViewModel() {
+class NoteDetailViewModel @ViewModelInject constructor(private val repository: NotesRepository): ViewModel() {
+
+
+
+
 }
