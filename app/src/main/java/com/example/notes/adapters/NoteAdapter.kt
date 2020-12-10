@@ -6,6 +6,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.notes.R
 import com.example.notes.data.local.Note
@@ -13,7 +15,29 @@ import com.example.notes.databinding.NoteItemBinding
 import java.text.SimpleDateFormat
 import java.util.*
 
-class NoteAdapter(var notesList: List<Note>, private val listener: OnItemClickListener, private val context: Context): RecyclerView.Adapter<NoteAdapter.MyViewHolder>() {
+class NoteAdapter(private val listener: OnItemClickListener, private val context: Context): RecyclerView.Adapter<NoteAdapter.MyViewHolder>() {
+
+
+    private val diffCallback = object : DiffUtil.ItemCallback<Note>() {
+        override fun areItemsTheSame(oldItem: Note, newItem: Note): Boolean {
+            return oldItem.id == newItem.id
+        }
+
+        override fun areContentsTheSame(oldItem: Note, newItem: Note): Boolean {
+            return oldItem.hashCode() == newItem.hashCode()
+        }
+    }
+
+    private val differ = AsyncListDiffer(this, diffCallback)
+
+    var notes: List<Note>
+        get() = differ.currentList
+        set(value) = differ.submitList(value)
+
+
+
+
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
         val view = NoteItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -21,7 +45,7 @@ class NoteAdapter(var notesList: List<Note>, private val listener: OnItemClickLi
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        val note = notesList[position]
+        val note = notes[position]
 
         holder.onNoteClicked(listener, note)
 
@@ -36,7 +60,7 @@ class NoteAdapter(var notesList: List<Note>, private val listener: OnItemClickLi
             holder.syncedTextView.text = "Synced"
         }
 
-        val dateFormat = SimpleDateFormat("dd:MM:yy, HH:mm", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("dd.MM.yy, HH:mm", Locale.getDefault())
         val date = dateFormat.format(note.date)
 
         holder.dateTextView.text = date
@@ -46,13 +70,13 @@ class NoteAdapter(var notesList: List<Note>, private val listener: OnItemClickLi
             val wrappedDrawable = DrawableCompat.wrap(it)
             val color = Color.parseColor("#${note.color}")
             DrawableCompat.setTint(wrappedDrawable, color)
-            holder.circle.background = it
+            holder.circle.background = wrappedDrawable
         }
 
 
     }
 
-    override fun getItemCount(): Int = notesList.size
+    override fun getItemCount(): Int = notes.size
 
 
 

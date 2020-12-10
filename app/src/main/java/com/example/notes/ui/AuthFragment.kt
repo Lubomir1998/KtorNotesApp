@@ -7,7 +7,6 @@ import android.view.*
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
-import androidx.room.Index
 import com.example.notes.Constants.KEY_EMAIL
 import com.example.notes.Constants.KEY_PASSWORD
 import com.example.notes.Constants.NO_EMAIL

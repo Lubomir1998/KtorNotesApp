@@ -16,7 +16,6 @@ class NotesViewModel @ViewModelInject constructor(private val repository: NotesR
     }.switchMap {
         MutableLiveData(Event(it))
     }
-
     val allNotes: LiveData<Event<Resource<List<Note>>>> = _allNotes
 
     fun syncAllNotes() = _forceUpdate.postValue(true)

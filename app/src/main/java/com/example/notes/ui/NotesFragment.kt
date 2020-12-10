@@ -3,6 +3,7 @@ package com.example.notes.ui
 import android.content.SharedPreferences
 import android.content.pm.ActivityInfo
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavOptions
@@ -16,10 +17,15 @@ import com.example.notes.databinding.FragmentNotesBinding
 import com.example.notes.viewmodels.NotesViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import com.example.notes.other.Status
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class NotesFragment: BaseFragment(R.layout.fragment_notes) {
+
+    private val TAG = "NotesFragment"
 
     private lateinit var binding: FragmentNotesBinding
     private val model: NotesViewModel by viewModels()
@@ -51,12 +57,19 @@ class NotesFragment: BaseFragment(R.layout.fragment_notes) {
             }
         }
 
-        noteAdapter = NoteAdapter(notes, listener, requireContext())
+        noteAdapter = NoteAdapter(listener, requireContext())
 
         setUpRecyclerView()
         subscribeToObservers()
 
 
+        binding.addNoteBtn.setOnClickListener {
+            findNavController().navigate(NotesFragmentDirections.actionNotesFragmentToAddEditNoteFragment(""))
+        }
+
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            subscribeToObservers()
+        }
 
 
     }
@@ -72,13 +85,15 @@ class NotesFragment: BaseFragment(R.layout.fragment_notes) {
 
     private fun subscribeToObservers() {
         model.allNotes.observe(viewLifecycleOwner, {
+            Log.d(TAG, "**********subscribeToObservers: it is null - ${it == null}")
             it?.let { event ->
                 val result = event.peekContent()
 
-                when(result.status) {
+                when (result.status) {
                     Status.SUCCESS -> {
                         displayData(result.data!!)
                         binding.swipeRefreshLayout.isRefreshing = false
+                        Log.d(TAG, "*********subscribeToObservers: status success")
                     }
 
                     Status.ERROR -> {
@@ -91,6 +106,7 @@ class NotesFragment: BaseFragment(R.layout.fragment_notes) {
                             displayData(notes)
                         }
                         binding.swipeRefreshLayout.isRefreshing = false
+                        Log.d(TAG, "*********subscribeToObservers: status error")
                     }
 
                     Status.LOADING -> {
@@ -98,6 +114,7 @@ class NotesFragment: BaseFragment(R.layout.fragment_notes) {
                             displayData(notes)
                         }
                         binding.swipeRefreshLayout.isRefreshing = true
+                        Log.d(TAG, "*********subscribeToObservers: status loading")
                     }
                 }
 
@@ -105,11 +122,11 @@ class NotesFragment: BaseFragment(R.layout.fragment_notes) {
         })
     }
 
-    private fun displayData(list: List<Note>) {
-        noteAdapter.notesList = list
+
+    private fun displayData(notes: List<Note>) {
+        noteAdapter.notes = notes
         noteAdapter.notifyDataSetChanged()
     }
-
 
     private fun setUpRecyclerView() {
         binding.notesRecyclerView.apply {

@@ -48,7 +48,24 @@ class NotesRepository
         }
     }
 
+    suspend fun getNoteById(id: String) = noteDao.getNoteById(id)
 
+    suspend fun insertNote(note: Note) {
+        val response = try {
+            noteApi.insertNote(note)
+        } catch(e: Exception) {
+            null
+        }
+        if(response != null && response.isSuccessful) {
+            noteDao.insertNote(note.apply { isSynced = true })
+        } else {
+            noteDao.insertNote(note)
+        }
+    }
+
+    suspend fun insertNotes(notes: List<Note>) {
+        notes.forEach { insertNote(it) }
+    }
 
     fun getAllNotes(): Flow<Resource<List<Note>>> {
         return networkBoundResource(
@@ -59,8 +76,8 @@ class NotesRepository
                     noteApi.getNotes()
                 },
                 savedFetchResult = { response ->
-                    response.body()?.let {
-                        // TODO save notes in database
+                    response.body()?.let { notes ->
+                        insertNotes(notes)
                     }
                 },
                 shouldFetch = {
