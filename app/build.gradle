@@ -50,6 +50,9 @@ dependencies {
 
     implementation "androidx.security:security-crypto:1.1.0-alpha02"
 
+    // Markwon
+    implementation "io.noties.markwon:core:4.4.0"
+
 // Swipe Refresh Layout
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
 

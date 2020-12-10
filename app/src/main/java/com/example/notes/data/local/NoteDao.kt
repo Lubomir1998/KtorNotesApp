@@ -1,5 +1,6 @@
 package com.example.notes.data.local
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -29,5 +30,14 @@ interface NoteDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertLocallyDeletedNoteId(locallyDeletedNoteId: LocallyDeletedNoteId)
+
+    @Query("DELETE FROM notes")
+    suspend fun deleteAllNotes()
+
+    @Query("SELECT * FROM notes WHERE isSynced = 0")
+    suspend fun getAllUnsyncedNotes(): List<Note>
+
+    @Query("SELECT * FROM notes WHERE id = :noteID")
+    fun observeNoteById(noteID: String): LiveData<Note>
 
 }

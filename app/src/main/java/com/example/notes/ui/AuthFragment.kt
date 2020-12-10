@@ -7,10 +7,10 @@ import android.view.*
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
-import com.example.notes.Constants.KEY_EMAIL
-import com.example.notes.Constants.KEY_PASSWORD
-import com.example.notes.Constants.NO_EMAIL
-import com.example.notes.Constants.NO_PASSWORD
+import com.example.notes.other.Constants.KEY_EMAIL
+import com.example.notes.other.Constants.KEY_PASSWORD
+import com.example.notes.other.Constants.NO_EMAIL
+import com.example.notes.other.Constants.NO_PASSWORD
 import com.example.notes.R
 import com.example.notes.data.remote.BasicAuthInterceptor
 import com.example.notes.databinding.FragmentAuthBinding

@@ -1,4 +1,4 @@
-package com.example.notes
+package com.example.notes.di
 
 import android.content.Context
 import android.content.SharedPreferences

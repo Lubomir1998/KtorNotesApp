@@ -13,7 +13,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.notes.Constants
+import com.example.notes.other.Constants
 import com.example.notes.R
 import com.example.notes.adapters.NoteAdapter
 import com.example.notes.data.local.Note
@@ -22,9 +22,6 @@ import com.example.notes.viewmodels.NotesViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import com.example.notes.other.Status
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -75,7 +72,7 @@ class NotesFragment: BaseFragment(R.layout.fragment_notes) {
         }
 
         binding.swipeRefreshLayout.setOnRefreshListener {
-            subscribeToObservers()
+            model.syncAllNotes()
         }
 
 

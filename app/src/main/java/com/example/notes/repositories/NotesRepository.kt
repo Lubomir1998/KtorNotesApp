@@ -15,6 +15,7 @@ import com.example.notes.other.checkForInternetConnection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
+import retrofit2.Response
 import javax.inject.Inject
 
 class NotesRepository
@@ -87,17 +88,40 @@ class NotesRepository
         }
     }
 
+    private var currentNotesResponse: Response<List<Note>>? = null
+
+    suspend fun syncNotes() {
+        val locallyDeletedNoteIds = noteDao.getAllLocallyDeletedNoteIds()
+        locallyDeletedNoteIds.forEach { id ->
+            deleteNote(id.locallyDeletedNoteId)
+        }
+
+        val unsyncNotes = noteDao.getAllUnsyncedNotes()
+        unsyncNotes.forEach { note -> insertNote(note) }
+
+        currentNotesResponse = noteApi.getNotes()
+
+        currentNotesResponse?.body()?.let { notes ->
+            noteDao.deleteAllNotes()
+            insertNotes(notes.onEach { note -> note.isSynced = true })
+        }
+
+    }
+
+    fun obserNote(id: String) = noteDao.observeNoteById(id)
+
     fun getAllNotes(): Flow<Resource<List<Note>>> {
         return networkBoundResource(
                 query = {
                     noteDao.getAllNotes()
                 },
                 fetch = {
-                    noteApi.getNotes()
+                    syncNotes()
+                    currentNotesResponse
                 },
                 savedFetchResult = { response ->
-                    response.body()?.let { notes ->
-                        insertNotes(notes)
+                    response?.body()?.let { notes ->
+                        insertNotes(notes.onEach { note -> note.isSynced = true })
                     }
                 },
                 shouldFetch = {

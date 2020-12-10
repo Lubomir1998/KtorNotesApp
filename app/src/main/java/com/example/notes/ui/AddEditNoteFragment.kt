@@ -10,9 +10,8 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
-import com.example.notes.Constants
-import com.example.notes.Constants.KEY_EMAIL
-import com.example.notes.Constants.NO_EMAIL
+import com.example.notes.other.Constants.KEY_EMAIL
+import com.example.notes.other.Constants.NO_EMAIL
 import com.example.notes.R
 import com.example.notes.data.local.Note
 import com.example.notes.databinding.FragmentAddEditNoteBinding
