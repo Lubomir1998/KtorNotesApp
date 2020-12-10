@@ -3,10 +3,12 @@ package com.example.notes.repositories
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import com.example.notes.data.local.LocallyDeletedNoteId
 import com.example.notes.data.local.Note
 import com.example.notes.data.local.NoteDao
 import com.example.notes.data.remote.NoteApi
 import com.example.notes.data.remote.requests.AccountRequest
+import com.example.notes.data.remote.requests.DeleteNoteRequest
 import com.example.notes.networkBoundResource
 import com.example.notes.other.Resource
 import com.example.notes.other.checkForInternetConnection
@@ -65,6 +67,24 @@ class NotesRepository
 
     suspend fun insertNotes(notes: List<Note>) {
         notes.forEach { insertNote(it) }
+    }
+
+    suspend fun deleteNoteLocallyDeletedNoteId(deletedNoteId: String) = noteDao.deleteLocallyDeletedNoteIds(deletedNoteId)
+
+    suspend fun deleteNote(noteId: String) {
+        val response = try {
+            noteApi.deleteNote(DeleteNoteRequest(noteId))
+        } catch (e: Exception) {
+            null
+        }
+
+        noteDao.deleteNoteById(noteId)
+
+        if(response == null || !response.isSuccessful) {
+            noteDao.insertLocallyDeletedNoteId(LocallyDeletedNoteId(noteId))
+        } else {
+            deleteNoteLocallyDeletedNoteId(noteId)
+        }
     }
 
     fun getAllNotes(): Flow<Resource<List<Note>>> {

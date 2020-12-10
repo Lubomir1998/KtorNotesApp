@@ -28,6 +28,6 @@ interface NoteApi {
     @POST("/deleteNote")
     suspend fun deleteNote(@Body request: DeleteNoteRequest): Response<ResponseBody>
 
-    @GET("getNotes")
+    @GET("/getNotes")
     suspend fun getNotes(): Response<List<Note>>
 }

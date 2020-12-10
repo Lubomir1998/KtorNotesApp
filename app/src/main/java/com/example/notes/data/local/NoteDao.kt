@@ -21,6 +21,13 @@ interface NoteDao {
     @Query("SELECT * FROM notes WHERE id = :id")
     suspend fun getNoteById(id: String): Note?
 
+    @Query("SELECT * FROM locallydeletednoteid")
+    suspend fun getAllLocallyDeletedNoteIds(): List<LocallyDeletedNoteId>
 
+    @Query("DELETE FROM locallydeletednoteid WHERE locallyDeletedNoteId = :id")
+    suspend fun deleteLocallyDeletedNoteIds(id: String)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertLocallyDeletedNoteId(locallyDeletedNoteId: LocallyDeletedNoteId)
 
 }

@@ -29,7 +29,9 @@ object AppModule {
         context,
         NoteDatabase::class.java,
         "notesDB"
-    ).build()
+    )
+            .fallbackToDestructiveMigration()
+            .build()
 
 
     @Singleton

@@ -6,6 +6,7 @@ import com.example.notes.data.local.Note
 import com.example.notes.other.Event
 import com.example.notes.other.Resource
 import com.example.notes.repositories.NotesRepository
+import kotlinx.coroutines.launch
 
 class NotesViewModel @ViewModelInject constructor(private val repository: NotesRepository): ViewModel() {
 
@@ -19,5 +20,17 @@ class NotesViewModel @ViewModelInject constructor(private val repository: NotesR
     val allNotes: LiveData<Event<Resource<List<Note>>>> = _allNotes
 
     fun syncAllNotes() = _forceUpdate.postValue(true)
+
+    fun deleteLocallyDeletedNoteId(noteId: String) = viewModelScope.launch {
+        repository.deleteNoteLocallyDeletedNoteId(noteId)
+    }
+
+    fun deleteNote(noteId: String) = viewModelScope.launch {
+        repository.deleteNote(noteId)
+    }
+
+    fun insertNote(note: Note) = viewModelScope.launch {
+        repository.insertNote(note)
+    }
 
 }
