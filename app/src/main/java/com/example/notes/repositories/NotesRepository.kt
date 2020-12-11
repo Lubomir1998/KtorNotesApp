@@ -1,13 +1,12 @@
 package com.example.notes.repositories
 
 import android.app.Application
-import android.content.Context
-import android.util.Log
 import com.example.notes.data.local.LocallyDeletedNoteId
 import com.example.notes.data.local.Note
 import com.example.notes.data.local.NoteDao
 import com.example.notes.data.remote.NoteApi
 import com.example.notes.data.remote.requests.AccountRequest
+import com.example.notes.data.remote.requests.AddOwnerRequest
 import com.example.notes.data.remote.requests.DeleteNoteRequest
 import com.example.notes.networkBoundResource
 import com.example.notes.other.Resource
@@ -41,6 +40,19 @@ class NotesRepository
     suspend fun loginUser(email: String, password: String) = withContext(Dispatchers.IO) {
         try{
             val response = noteApi.login(AccountRequest(email, password))
+            if(response.isSuccessful && response.body()!!.successful) {
+                Resource.success(response.body()?.message)
+            } else {
+                Resource.error(response.body()?.message ?: response.message(), null)
+            }
+        } catch (e: Exception){
+            Resource.error("Couldn't connect to servers. Check your internet connection", null)
+        }
+    }
+
+    suspend fun addOwnerToNote(noteId: String, owner: String) = withContext(Dispatchers.IO) {
+        try{
+            val response = noteApi.addOwnerToNote(AddOwnerRequest(noteId, owner))
             if(response.isSuccessful && response.body()!!.successful) {
                 Resource.success(response.body()?.message)
             } else {
@@ -96,8 +108,8 @@ class NotesRepository
             deleteNote(id.locallyDeletedNoteId)
         }
 
-        val unsyncNotes = noteDao.getAllUnsyncedNotes()
-        unsyncNotes.forEach { note -> insertNote(note) }
+        val unsyncedNotes = noteDao.getAllUnsyncedNotes()
+        unsyncedNotes.forEach { note -> insertNote(note) }
 
         currentNotesResponse = noteApi.getNotes()
 
@@ -108,7 +120,7 @@ class NotesRepository
 
     }
 
-    fun obserNote(id: String) = noteDao.observeNoteById(id)
+    fun observeNote(id: String) = noteDao.observeNoteById(id)
 
     fun getAllNotes(): Flow<Resource<List<Note>>> {
         return networkBoundResource(

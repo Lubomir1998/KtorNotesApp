@@ -1,15 +1,15 @@
 package com.example.notes.ui
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.notes.R
 import com.example.notes.data.local.Note
 import com.example.notes.databinding.FragmentNoteDetailBinding
+import com.example.notes.dialogs.AddOwnerToNoteDialog
+import com.example.notes.other.Status
 import com.example.notes.viewmodels.NoteDetailViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import io.noties.markwon.Markwon
@@ -24,12 +24,20 @@ class NoteDetailFragment: BaseFragment(R.layout.fragment_note_detail) {
     private var currentNote: Note? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        setHasOptionsMenu(true)
         binding = FragmentNoteDetailBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        if(savedInstanceState != null) {
+            val addOwnerDialog = parentFragmentManager.findFragmentByTag("TAG_2") as AddOwnerToNoteDialog?
+            addOwnerDialog?.setPositiveListener {
+                addOwnerToCurrentNote(it)
+            }
+        }
 
         subscribeToObservers()
 
@@ -44,6 +52,23 @@ class NoteDetailFragment: BaseFragment(R.layout.fragment_note_detail) {
 
 
     private fun subscribeToObservers() {
+        model.addOwnerStatus.observe(viewLifecycleOwner, { event ->
+            event?.getContentIfNotHandled()?.let { result ->
+                when(result.status) {
+                    Status.SUCCESS -> {
+                        binding.addOwnerProgressBar.visibility = View.GONE
+                        showSnackBar(result.data ?: "Successfully added")
+                    }
+                    Status.ERROR -> {
+                        binding.addOwnerProgressBar.visibility = View.GONE
+                        showSnackBar(result.message ?: "An unknown error occurred")
+                    }
+                    Status.LOADING -> {
+                        binding.addOwnerProgressBar.visibility = View.VISIBLE
+                    }
+                }
+            }
+        })
         model.observeNote(args.id).observe(viewLifecycleOwner, {
             it?.let { note ->
                 binding.tvNoteTitle.text = note.title
@@ -58,6 +83,33 @@ class NoteDetailFragment: BaseFragment(R.layout.fragment_note_detail) {
         val markwon = Markwon.create(requireContext())
         val markdown = markwon.toMarkdown(text)
         markwon.setParsedMarkdown(binding.tvNoteContent, markdown)
+    }
+
+    private fun showOwnerDialog() {
+        AddOwnerToNoteDialog().apply {
+            setPositiveListener {
+                addOwnerToCurrentNote(it)
+            }
+        }.show(parentFragmentManager, "TAG_2")
+    }
+
+    private fun addOwnerToCurrentNote(email: String) {
+        currentNote?.let {
+            model.addOwnerToNote(it.id, email)
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.note_detail_menu, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId) {
+            R.id.miAddOwner -> showOwnerDialog()
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 
 }
